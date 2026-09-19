@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Support desk, written in Seems</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><b>Seems</b><span>A real web service written in the language: Flask, SQLite and four judgments.</span></div>
+    <nav class="nav"><a href="/">Playground</a><a class="on" href="/desk">Support desk app</a></nav>
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">checking…</span></div>
+  </header>
+
+  <main class="desk">
+    <section class="card">
+      <div class="card-head"><b>New ticket</b></div>
+      <form class="form" id="form">
+        <label>What the customer wrote
+          <textarea id="text" required placeholder="Type a support message, or pick a sample below."></textarea>
+        </label>
+        <label>Order amount (exact, checked in code)
+          <input type="number" id="amount" min="0" step="0.01" value="0">
+        </label>
+        <div><button class="btn primary" id="send" type="submit">Route this ticket</button></div>
+        <div class="note" id="formNote">The rule <code>amount &gt; 500</code> runs in Python. The meaning of the text goes to Jev.</div>
+        <div class="samples" id="samples"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div class="tabs">
+          <button class="tab on" data-pane="tickets">Routed tickets</button>
+          <button class="tab" data-pane="source">Source: desk.seems</button>
+        </div>
+        <span class="grow"></span>
+        <button class="btn small" id="clear">clear list</button>
+      </div>
+      <div class="pane on tickets" id="pane-tickets"><div class="empty" id="none">No tickets yet. Send one from the left.</div></div>
+      <div class="pane source-view" id="pane-source"><div class="pycode" id="source"></div></div>
+    </section>
+  </main>
+
+  <script src="/static/highlight.js"></script>
+  <script src="/static/trace.js"></script>
+  <script src="/static/desk.js"></script>
+</body>
+</html>

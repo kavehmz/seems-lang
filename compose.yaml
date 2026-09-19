@@ -1,0 +1,17 @@
+name: seems
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:${SEEMS_PORT:-3004}:3000"
+    env_file:
+      - .env
+    environment:
+      PORT: "3000"
+      SEEMS_CACHE: /tmp/seems-cache.sqlite
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]

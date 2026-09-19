@@ -1,0 +1,37 @@
+# Any Python library works. This program uses:
+#   feedparser  (pip)      to read an RSS feed
+#   sqlite3     (built in) to store and query the result
+import sqlite3
+
+import feedparser
+
+kind topic: "What is this news item mainly about?"
+    markets: "stocks, rates, currencies, commodities, company results"
+    tech:    "software, chips, AI, gadgets, security"
+    science: "research, space, health, climate"
+    other:   "none of these fit"
+
+feed = feedparser.parse("data/feed.xml")
+db = sqlite3.connect(":memory:")
+db.execute("create table news (title text, topic text, clickbait real, mismatch integer)")
+
+# Ask everything first. Nothing is sent until the loop reads the first answer.
+items = [(e, topic(e.title), e.title seems like clickbait, e.summary contradicts e.title)
+         for e in feed.entries]
+
+for entry, about, bait, mismatch in items:
+    db.execute("insert into news values (?, ?, ?, ?)",
+               (entry.title, about.name, bait.p, int(mismatch.yes)))
+
+print("Per topic, without clickbait:")
+for name, count in db.execute(
+        "select topic, count(*) from news where clickbait < 0.5 group by topic order by 2 desc"):
+    print(f"  {name:<8} {count}")
+
+print("\nDropped as clickbait:")
+for title, p in db.execute("select title, clickbait from news where clickbait >= 0.5 order by 2 desc"):
+    print(f"  {p:.2f}  {title}")
+
+print("\nSummary contradicts its own title:")
+for (title,) in db.execute("select title from news where mismatch = 1"):
+    print("  ", title)

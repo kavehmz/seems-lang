@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seems: Python, plus judgment</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><b>Seems</b><span>Python, plus judgment. <em>is</em> runs in code, <em>seems</em> asks Jev.</span></div>
+    <nav class="nav"><a class="on" href="/">Playground</a><a href="/desk">Support desk app</a></nav>
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">checking…</span></div>
+  </header>
+
+  <div class="examples" id="examples"></div>
+
+  <main class="main">
+    <section class="col">
+      <div class="card editor-card">
+        <div class="card-head">
+          <b id="fileName">main.seems</b>
+          <span class="grow"></span>
+          <span class="legend"><i class="l-verb">verb</i><i class="l-phrase">English for Jev</i><span>everything else is Python</span></span>
+        </div>
+        <div class="editor">
+          <div class="gutter" id="gutter"></div>
+          <div class="code-wrap">
+            <pre id="hl" aria-hidden="true"></pre>
+            <textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="Seems source code"></textarea>
+          </div>
+        </div>
+        <div class="problem" id="problem" hidden></div>
+        <div class="runbar">
+          <button class="btn primary" id="run">Run</button>
+          <span class="kbd">Ctrl / ⌘ + Enter</span>
+          <label class="opt" title="How sure Jev must be before a judgment counts as yes or no. Between the two bars it is unsure.">
+            sure at <input type="range" id="sure" min="0.55" max="0.99" step="0.01" value="0.75"><output id="sureOut">0.75</output>
+          </label>
+          <label class="opt" title="Known answers are reused, so a second run is instant, free and gives the same result.">
+            <input type="checkbox" id="cache" checked> reuse known answers
+          </label>
+          <button class="btn small" id="clearCache" title="Forget every stored answer">forget answers</button>
+        </div>
+      </div>
+      <div class="card output-card">
+        <div class="card-head"><b>Output</b><span class="grow"></span><span id="runState"></span></div>
+        <pre class="output" id="output"><span class="hint">Pick an example or write your own program, then press Run.</span></pre>
+      </div>
+    </section>
+
+    <section class="col">
+      <div class="card" style="flex:1">
+        <div class="card-head">
+          <div class="tabs">
+            <button class="tab on" data-pane="judgments">Judgments</button>
+            <button class="tab" data-pane="python">Translated Python</button>
+            <button class="tab" data-pane="guide">Language guide</button>
+          </div>
+        </div>
+        <div class="pane on" id="pane-judgments">
+          <div class="stats" id="stats"></div>
+          <div id="judgments"><div class="empty">Every judgment appears here with its probability, the exact question Jev got, and what it cost.</div></div>
+        </div>
+        <div class="pane" id="pane-python"><div class="pycode" id="python"></div></div>
+        <div class="pane" id="pane-guide">
+          <div class="guide">
+            <p><a href="/guide" target="_blank" rel="noopener">Open the full language guide</a> in a new tab. Below is the short version.</p>
+            <h3>The rule</h3>
+            <p>Seems is Python with a few extra words. Every Python program is a valid Seems program, so every library works.
+              Python operators are <b>exact</b> and run in code. A <b>judgment verb</b> sends the text after it to TypeSafe Jev.</p>
+<pre>if order.total &gt; 500 and ticket.text asks for a refund:
+    send_to_manager(ticket)
+unsure:
+    send_to_human(ticket)</pre>
+
+            <h3>Judgment verbs</h3>
+            <table>
+              <tr><th>Form</th><th>Verbs</th><th>After the verb</th></tr>
+              <tr><td><code>value VERB english</code></td><td><code>seems sounds looks mentions discusses describes expresses suggests asks requests</code></td>
+                <td>Plain English. It ends at <code>and</code>, <code>or</code>, <code>if</code>, <code>else</code>, a comma, a closing bracket, a colon or the end of the line. Put it in quotes if it needs one of those, or an apostrophe.</td></tr>
+              <tr><td><code>value VERB value</code></td><td><code>contradicts supports answers means matches</code></td>
+                <td>A second value: a variable, or English in quotes.</td></tr>
+            </table>
+            <p>A judgment is <b>yes</b>, <b>no</b> or <b>unsure</b>. It also has <code>.p</code>, the probability, and <code>.verdict()</code>.</p>
+
+            <h3>unsure</h3>
+            <ul>
+              <li><code>unsure:</code> is an extra branch of <code>if</code>. It comes last.</li>
+              <li>Without it, an unsure judgment raises <code>Unsure</code>. Catch it like any exception.</li>
+              <li><code>and</code>, <code>or</code>, <code>not</code> follow three-valued logic: <i>no and unsure</i> is no.</li>
+              <li><code>with seems.certainty(0.95):</code> raises the bar inside the block.</li>
+            </ul>
+
+            <h3>kind, scale, judgment</h3>
+<pre>kind team: "Which team should handle this ticket?"
+    billing:   "payments, invoices, refunds"
+    technical: "bugs, outages"
+    other:     "none of these fit"
+
+scale anger: "How angry is the customer?"
+    calm:    "polite, no complaint"
+    annoyed: "complains but stays civil"
+    furious: "insults, threats, all caps"
+
+judgment urgent: "Does this need an answer within one hour?"
+    yes: "outage, money lost, legal deadline"
+    no:  "general question, feedback"
+
+owner = team(text)            # owner.name, owner.p("billing"), owner.sure
+if owner == team.billing: ...
+if anger(text) &gt;= anger.annoyed: ...
+if text seems urgent: ...     # one word after the verb can name a judgment</pre>
+
+            <h3>Speed</h3>
+            <ul>
+              <li>A judgment is lazy. Nothing is sent until the program needs an answer.</li>
+              <li>Then everything waiting goes together. Questions about the same value share one request.</li>
+              <li>An <code>if / elif</code> statement asks the judgments of all its branches in one round trip.</li>
+              <li>An exact "no" skips Jev completely.</li>
+              <li>For loops over independent items use <code>seems.each(items, function)</code>, or build a list of judgments first.</li>
+            </ul>
+
+            <h3>Keep in code</h3>
+            <p>Jev judges meaning. Math, counting, dates and exact lookups stay in Python. Jev reads very literally, so write the exact condition you mean.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/highlight.js"></script>
+  <script src="/static/trace.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

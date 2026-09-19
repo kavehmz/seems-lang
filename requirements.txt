@@ -1,0 +1,6 @@
+# The Seems language itself needs nothing outside the Python standard library.
+# These packages are for the demo server, the example programs and the tests.
+flask>=3.0,<4
+gunicorn>=22
+feedparser>=6.0,<7
+pytest>=8

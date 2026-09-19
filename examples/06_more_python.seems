@@ -1,0 +1,59 @@
+# Judgments are ordinary values, so they work with the rest of Python:
+# classes, properties, generators, sorting, match, comprehensions.
+from dataclasses import dataclass
+from functools import cached_property
+
+kind intent: "What does the visitor want to do?"
+    buy:      "wants to purchase or asks for a price"
+    complain: "reports a problem or is unhappy"
+    leave:    "wants to cancel, unsubscribe or close the account"
+    chat:     "small talk or anything else"
+
+scale effort: "How much work is it to answer this message well?"
+    trivial: "a one line answer that is always the same"
+    normal:  "needs a short, specific answer"
+    heavy:   "needs investigation, several steps or another team"
+
+
+@dataclass
+class Message:
+    text: str
+
+    @cached_property
+    def intent(self):
+        return intent(self.text)
+
+    @cached_property
+    def effort(self):
+        return effort(self.text)
+
+
+def risky(messages):
+    """A generator: yields messages from people about to leave."""
+    for message in messages:
+        if message.intent.is_one_of(intent.leave, intent.complain):
+            yield message
+
+
+inbox = [Message(t) for t in (
+    "How much is the pro plan for ten people?",
+    "Your last update deleted my saved reports. I need them back before Friday.",
+    "Please close my account and delete my data.",
+    "haha nice 404 page",
+    "Is there a student discount?",
+)]
+
+# Touch every lazy value once, so all questions go out together.
+pending = [(m.intent, m.effort) for m in inbox]
+
+print("Hardest first:")
+for message in sorted(inbox, key=lambda m: float(m.effort), reverse=True):
+    print(f"  {message.effort.level.name:<8} {message.intent.name:<9} {message.text}")
+
+print("\nAt risk:")
+for message in risky(inbox):
+    match message.intent:
+        case intent.leave:
+            print("  win back ->", message.text)
+        case intent.complain:
+            print("  apologise ->", message.text)

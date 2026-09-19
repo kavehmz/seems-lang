@@ -1,0 +1,60 @@
+# A support inbox. Ordinary Python, plus three declarations and a few judgments.
+#
+#   kind      one of a set        (a Jev Choice)
+#   scale     a position          (a Jev Score)
+#   judgment  a named yes/no      (a Jev Noul with criteria)
+import json
+from dataclasses import dataclass
+
+import seems
+
+kind team: "Which team should handle this support ticket?"
+    billing:   "payments, charges, invoices, refunds"
+    technical: "bugs, errors, outages, integrations"
+    shipping:  "delivery status, delays, lost or damaged parcels"
+    other:     "none of the other teams fit"
+
+scale anger: "How angry is the customer?"
+    calm:    "polite or neutral, no complaint about the service"
+    annoyed: "complains or is frustrated, but stays civil"
+    furious: "insults, threats, shouting in capitals, or says they will leave"
+
+judgment urgent: "Does this ticket need an answer within one hour?"
+    yes: "an outage, lost money, a safety problem or a legal deadline"
+    no:  "a general question, feedback, or something that can wait a day"
+
+REFUND_LIMIT = 500
+
+
+@dataclass
+class Ticket:
+    id: str
+    amount: float
+    text: str
+
+
+def route(ticket):
+    # Judgments are lazy. These three lines send nothing.
+    owner = team(ticket.text)
+    mood = anger(ticket.text)
+    wants_refund = ticket.text asks for a refund
+
+    # The first `if` needs an answer, so everything above goes to Jev in ONE request.
+    if ticket.amount > REFUND_LIMIT and wants_refund:
+        queue = "manager"
+    elif ticket.text seems urgent or mood >= anger.furious:
+        queue = "priority"
+    else:
+        queue = owner.name
+    unsure:
+        queue = "human review"
+    return ticket, queue, owner, mood
+
+
+with open("data/tickets.json") as handle:
+    inbox = [Ticket(**row) for row in json.load(handle)]
+
+# Tickets do not depend on each other, so route them side by side.
+print(f"{'id':<6}{'queue':<14}{'team':<11}{'anger':<9}text")
+for ticket, queue, owner, mood in seems.each(inbox, route):
+    print(f"{ticket.id:<6}{queue:<14}{owner.name:<11}{mood.level.name:<9}{ticket.text[:46]}")

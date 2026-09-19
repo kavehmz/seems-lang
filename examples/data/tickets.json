@@ -1,0 +1,10 @@
+[
+  {"id": "T-101", "amount": 1240.0, "text": "I was charged for the annual plan twice. Please refund the second payment of 1240 euros."},
+  {"id": "T-102", "amount": 0.0,    "text": "Our whole team has been locked out since 9am and customers cannot place orders. We are losing money every minute."},
+  {"id": "T-103", "amount": 39.0,   "text": "THIS IS THE THIRD TIME I WRITE. Your app is garbage and I am leaving for a competitor."},
+  {"id": "T-104", "amount": 18.5,   "text": "Hi, my parcel says delivered but it is not here. Could you check with the courier? Thanks!"},
+  {"id": "T-105", "amount": 0.0,    "text": "Do you have an API for exporting invoices? No rush, just exploring."},
+  {"id": "T-106", "amount": 890.0,  "text": "The standing desk arrived. It wobbles a bit and I am not sure I want to keep it."},
+  {"id": "T-107", "amount": 64.0,   "text": "Love the product. One idea: dark mode for the dashboard would be great."},
+  {"id": "T-108", "amount": 310.0,  "text": "I'd like my money back for order 5512, the jacket does not fit."}
+]

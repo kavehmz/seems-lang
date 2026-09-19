@@ -1,0 +1,117 @@
+"""Support desk: a small web service written in Seems.
+
+Everything in this file is ordinary Python (Flask, SQLite, JSON), except the three
+declarations and the conditions inside route(). The server loads it with a normal
+`import desk`.
+"""
+import json
+import os
+import sqlite3
+import time
+
+from flask import Blueprint, jsonify, request
+
+import seems
+
+kind team: "Which team should handle this support ticket?"
+    billing:   "payments, charges, invoices, refunds"
+    technical: "bugs, errors, outages, integrations"
+    shipping:  "delivery status, delays, lost or damaged parcels"
+    other:     "none of the other teams fit"
+
+scale anger: "How angry is the customer?"
+    calm:    "polite or neutral, no complaint about the service"
+    annoyed: "complains or is frustrated, but stays civil"
+    furious: "insults, threats, shouting in capitals, or says they will leave"
+
+judgment urgent: "Does this ticket need an answer within one hour?"
+    yes: "an outage, lost money, a safety problem or a legal deadline"
+    no:  "a general question, feedback, or something that can wait a day"
+
+REFUND_LIMIT = 500
+DB_PATH = os.environ.get("DESK_DB", "/tmp/seems-desk.sqlite")
+
+bp = Blueprint("desk", __name__)
+
+
+def route(text, amount):
+    """Decide which queue a ticket goes to. Code owns the rules. Jev reads the text."""
+    owner = team(text)
+    mood = anger(text)
+    wants_refund = text asks for a refund
+
+    if amount > REFUND_LIMIT and wants_refund:
+        queue, reason = "manager", f"refund request above {REFUND_LIMIT}"
+    elif text seems urgent or mood >= anger.furious:
+        queue, reason = "priority", "urgent, or the customer is furious"
+    elif not owner.sure:
+        queue, reason = "human review", "no team is a clear match"
+    else:
+        queue, reason = owner.name, f"handled by the {owner.name} team"
+    unsure:
+        queue, reason = "human review", "Jev was not sure, so a person decides"
+
+    return {"queue": queue, "reason": reason, "team": owner.name,
+            "team_p": round(owner.p(owner.top), 2), "anger": mood.level.name,
+            "anger_score": round(mood.score, 2), "refund_p": round(wants_refund.p, 2)}
+
+
+def database():
+    db = sqlite3.connect(DB_PATH, timeout=5)
+    db.row_factory = sqlite3.Row
+    db.execute("""create table if not exists tickets (
+        id integer primary key autoincrement, created real, text text, amount real,
+        result text, trace text, ms integer)""")
+    return db
+
+
+def as_dict(row):
+    return {"id": row["id"], "created": row["created"], "text": row["text"], "amount": row["amount"],
+            "ms": row["ms"], **json.loads(row["result"]), "trace": json.loads(row["trace"])}
+
+
+@bp.get("/api/tickets")
+def list_tickets():
+    with database() as db:
+        rows = db.execute("select * from tickets order by id desc limit 50").fetchall()
+    return jsonify([as_dict(row) for row in rows])
+
+
+@bp.post("/api/tickets")
+def create_ticket():
+    body = request.get_json(silent=True) or {}
+    text = str(body.get("text") or "").strip()[:2000]
+    try:
+        amount = max(0.0, float(body.get("amount") or 0))
+    except (TypeError, ValueError):
+        return jsonify(error="amount must be a number"), 400
+    if not text:
+        return jsonify(error="write a ticket first"), 400
+
+    started = time.perf_counter()
+    try:
+        with seems.trace() as events:
+            result = route(text, amount)
+    except seems.JevError as err:
+        return jsonify(error=str(err)), 502
+    ms = round((time.perf_counter() - started) * 1000)
+
+    with database() as db:
+        cursor = db.execute(
+            "insert into tickets (created, text, amount, result, trace, ms) values (?, ?, ?, ?, ?, ?)",
+            (time.time(), text, amount, json.dumps(result), json.dumps(events), ms))
+        row = db.execute("select * from tickets where id = ?", (cursor.lastrowid,)).fetchone()
+    return jsonify(as_dict(row)), 201
+
+
+@bp.delete("/api/tickets")
+def clear_tickets():
+    with database() as db:
+        db.execute("delete from tickets")
+    return jsonify(ok=True)
+
+
+@bp.get("/api/source")
+def source():
+    with open(__file__, encoding="utf-8") as handle:
+        return jsonify(file=os.path.basename(__file__), source=handle.read())

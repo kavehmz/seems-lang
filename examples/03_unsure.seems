@@ -1,0 +1,34 @@
+# Three ways to handle "Jev is not sure".
+import seems
+
+messages = [
+    "Cancel my subscription today. I mean it.",
+    "I was charged twice for the same order. Can someone look into this?",
+    "What are your opening hours on Sunday?",
+]
+
+# 1. The `unsure:` branch. A judgment is a value, so it can live in a variable.
+for text in messages:
+    wants_refund = text asks for a refund
+    if wants_refund:
+        print("refund   :", text)
+    else:
+        print("no refund:", text)
+    unsure:
+        print(f"unsure   : {text}   (p = {wants_refund.p:.2f})")
+
+# 2. No `unsure:` branch? Then an unsure judgment raises an exception.
+#    A program can never act on a guess by accident.
+print()
+try:
+    if messages[1] asks for a refund:
+        print("paying out...")
+except Unsure as err:
+    print("stopped:", err)
+
+# 3. Raise the bar where a mistake is expensive.
+print()
+text = "Please close my account."
+print("default bar 0.75 :", (text seems like a cancellation).verdict())
+with seems.certainty(0.999):
+    print("bar 0.999        :", (text seems like a cancellation).verdict())

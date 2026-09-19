@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Demo Wire</title>
+    <link>https://example.com/</link>
+    <description>Invented headlines for the Seems demo. None of this is real news.</description>
+    <item>
+      <title>Central bank holds rates, signals one cut before year end</title>
+      <description>The bank kept its main rate unchanged and said one reduction is likely before December if inflation keeps easing.</description>
+    </item>
+    <item>
+      <title>You won't BELIEVE what this one chart says about your savings</title>
+      <description>A look at average household savings over ten years.</description>
+    </item>
+    <item>
+      <title>Chipmaker beats forecasts as data centre demand grows</title>
+      <description>Quarterly revenue rose 18 percent, ahead of analyst expectations, driven by sales to cloud providers.</description>
+    </item>
+    <item>
+      <title>Open source database project ships major security fix</title>
+      <description>Maintainers urged users to upgrade after patching a flaw that allowed remote code execution.</description>
+    </item>
+    <item>
+      <title>Telescope spots water vapour on a distant rocky planet</title>
+      <description>Researchers detected water vapour in the atmosphere of a rocky exoplanet 40 light years away.</description>
+    </item>
+    <item>
+      <title>Oil prices jump to a six month high</title>
+      <description>Crude fell for a third day, touching its lowest level since spring as supply worries faded.</description>
+    </item>
+    <item>
+      <title>Doctors HATE this weird trick for perfect sleep</title>
+      <description>Sponsored: a pillow company describes its new product.</description>
+    </item>
+    <item>
+      <title>City marathon draws record number of runners</title>
+      <description>More than 40,000 people finished the race in mild weather on Sunday.</description>
+    </item>
+    <item>
+      <title>New phone OS update adds on-device translation</title>
+      <description>The update brings offline translation for 20 languages and longer battery life on older models.</description>
+    </item>
+    <item>
+      <title>Trial finds new vaccine cuts infections by half</title>
+      <description>A study of 12,000 adults found the vaccine reduced infections by 52 percent compared with a placebo.</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seems: Python, plus judgment</title>
+  <meta name="description" content="Seems is a superset of Python where a condition can be plain English, answered by TypeSafe Jev as yes, no or unsure. The language guide.">
+  <style>
+    :root {
+      --bg: #f6f5f1; --panel: #ffffff; --panel-2: #faf9f6; --line: #e3e0d8; --text: #1f2328; --muted: #6b7280;
+      --accent: #5b4bdb; --accent-soft: #ece9ff; --on-accent: #ffffff;
+      --yes: #15803d; --yes-soft: #dcfce7; --no: #64748b; --no-soft: #e9edf2; --unsure: #b45309; --unsure-soft: #fef0d6;
+      --kw: #8250df; --str: #0a6b3d; --com: #8b949e; --num: #0550ae; --fn: #1f6feb;
+      --verb: #c2410c; --phrase: #c2410c; --phrase-bg: #fff1e6;
+      --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1115; --panel: #171a21; --panel-2: #1c2029; --line: #2a2f3a; --text: #e6e8ec; --muted: #9aa3b2;
+        --accent: #9d8cff; --accent-soft: #2a2550; --on-accent: #14112b;
+        --yes: #4ade80; --yes-soft: #12351f; --no: #94a3b8; --no-soft: #232a36; --unsure: #fbbf24; --unsure-soft: #3a2c0a;
+        --kw: #c4a7ff; --str: #7ee0a1; --com: #6b7486; --num: #79c0ff; --fn: #8ab4ff;
+        --verb: #ff9f5a; --phrase: #ffb37a; --phrase-bg: #35220f;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans); }
+    a { color: var(--accent); }
+    code, pre { font-family: var(--mono); }
+    code { font-size: .92em; background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+    pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+    pre.code { margin: 14px 0; padding: 13px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+      overflow-x: auto; font-size: 13.5px; line-height: 1.55; }
+    .kw { color: var(--kw); } .str { color: var(--str); } .com { color: var(--com); font-style: italic; } .num { color: var(--num); } .fn { color: var(--fn); }
+    .sx-keyword, .sx-verb { color: var(--verb); font-weight: 700; }
+    .sx-phrase { color: var(--phrase); background: var(--phrase-bg); border-radius: 3px; }
+    .sx-name { color: var(--fn); font-weight: 600; } .sx-entry { color: var(--fn); }
+
+    header.hero { border-bottom: 1px solid var(--line); background: var(--panel); }
+    .hero-inner { max-width: 1080px; margin: 0 auto; padding: 44px 24px 34px; }
+    .hero h1 { margin: 0; font-size: 44px; letter-spacing: -0.03em; line-height: 1.1; }
+    .hero h1 span { color: var(--muted); font-weight: 500; font-size: 24px; display: block; margin-top: 8px; letter-spacing: 0; }
+    .hero h1 em { font-style: normal; font-family: var(--mono); color: var(--verb); }
+    .hero p.lead { font-size: 18px; max-width: 720px; margin: 18px 0 0; }
+    .hero .buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+    .btn { display: inline-block; padding: 9px 16px; border-radius: 9px; border: 1px solid var(--line); text-decoration: none; color: var(--text); background: var(--panel-2); font-weight: 500; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .hero pre.code { margin-top: 26px; font-size: 15px; }
+
+    .layout { max-width: 1080px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; }
+    nav.toc { position: sticky; top: 20px; align-self: start; font-size: 14px; }
+    nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 4px 0; }
+    nav.toc a:hover { color: var(--text); }
+    nav.toc b { display: block; margin: 0 0 6px; color: var(--text); }
+    main { min-width: 0; max-width: 780px; }
+    main h2 { font-size: 26px; margin: 44px 0 10px; letter-spacing: -0.02em; padding-top: 8px; }
+    main h2:first-child { margin-top: 8px; }
+    main h3 { font-size: 18px; margin: 28px 0 6px; }
+    main p, main li { margin: 6px 0; }
+    main ul { padding-left: 22px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14.5px; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; }
+    .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+    .card b { display: block; margin-bottom: 4px; }
+    .card.yes { border-left: 4px solid var(--yes); } .card.no { border-left: 4px solid var(--no); } .card.unsure { border-left: 4px solid var(--unsure); }
+    .note { background: var(--accent-soft); border-radius: 10px; padding: 12px 16px; margin: 14px 0; }
+    .rule { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .rule .card code { font-size: 15px; background: none; border: 0; padding: 0; }
+    img.shot { width: 100%; border: 1px solid var(--line); border-radius: 10px; margin: 12px 0; }
+    footer { max-width: 1080px; margin: 30px auto 50px; padding: 0 24px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; gap: 12px; }
+      nav.toc { position: static; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+      nav.toc b { width: 100%; }
+      .three, .rule { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 34px; }
+    }
+  </style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <h1>Seems <span>Python, plus judgment. <em>is</em> runs in code, <em>seems</em> asks Jev.</span></h1>
+    <p class="lead">Seems is a superset of Python. A condition can be plain English, and TypeSafe Jev answers it
+      with a probability. The answer is yes, no or unsure, and unsure is a real branch of <code>if</code>.
+      Every Python library keeps working.</p>
+    <div class="buttons">
+      <a class="btn primary" href="https://github.com/kavehmz/seems-lang">Source and playground on GitHub</a>
+      <a class="btn" href="#run">Run it locally</a>
+    </div>
+<pre class="code seems"><code><span class="kw">if</span> order.total &gt; <span class="num">500</span> <span class="kw">and</span> ticket.text <span class="sx-verb">asks</span> <span class="sx-phrase">for a refund</span>:
+    <span class="fn">send_to_manager</span>(ticket)
+<span class="sx-keyword">unsure</span>:
+    <span class="fn">send_to_human</span>(ticket)</code></pre>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc">
+  <b>Guide</b>
+  <a href="#rule">1. One rule</a>
+  <a href="#verbs">2. Judgment verbs</a>
+  <a href="#unsure">3. Unsure</a>
+  <a href="#declarations">4. kind, scale, judgment</a>
+  <a href="#speed">5. Speed</a>
+  <a href="#tools">6. Tools</a>
+  <a href="#code">7. Keep in code</a>
+  <a href="#run">8. Run it</a>
+</nav>
+
+<main>
+<h2 id="rule">1. One rule</h2>
+<div class="rule">
+  <div class="card"><b>Exact</b><code>review.stars >= 4</code><p>Python operators run in code: <code>&gt;</code>, <code>==</code>, <code>in</code>, <code>len(...)</code>.</p></div>
+  <div class="card"><b>Judgment</b><code>review.text <span class="sx-verb">seems</span> <span class="sx-phrase">happy</span></code><p>A judgment verb sends a question to Jev and gets a probability back.</p></div>
+</div>
+<pre class="code seems"><code><span class="kw">if</span> review.stars &gt;= <span class="num">4</span> <span class="kw">and</span> review.text <span class="sx-verb">seems</span> <span class="sx-phrase">happy</span>:
+    <span class="fn">thank</span>(review)</code></pre>
+<p>Everything else is Python 3.13. Every Python program is already a valid Seems program, so classes,
+exceptions, async, pytest and every pip library work from day one. The translator turns the few new
+constructs into plain Python and keeps every line on its own line number.</p>
+
+<h2 id="verbs">2. Judgment verbs</h2>
+<h3>Describing verbs: <code>value VERB english</code></h3>
+<p><code>seems</code> <code>sounds</code> <code>looks</code> <code>mentions</code> <code>discusses</code> <code>describes</code>
+  <code>expresses</code> <code>suggests</code> <code>asks</code> <code>requests</code></p>
+<pre class="code seems"><code>ticket.text <span class="sx-verb">asks</span> <span class="sx-phrase">for a refund</span>
+item.title <span class="sx-verb">seems</span> <span class="sx-phrase">like clickbait</span>
+log_line <span class="sx-verb">suggests</span> <span class="sx-phrase">a memory leak</span>
+rows[<span class="num">0</span>][<span class="str">"body"</span>].<span class="fn">strip</span>() <span class="sx-verb">seems</span> <span class="sx-phrase">rude</span>
+(first + second) <span class="sx-verb">seems</span> <span class="sx-phrase">too long</span></code></pre>
+<ul>
+  <li>The value on the left is what Jev looks at. It can be a name, an attribute, an index or a call. Put anything larger in brackets.</li>
+  <li>The English runs until <code>and</code>, <code>or</code>, <code>if</code>, <code>else</code>, a comma, a closing bracket, a colon or the end of the line.
+    Inside brackets it also ends at the <code>for</code> of a comprehension.</li>
+  <li>Put the English in quotes when it needs one of those words, an apostrophe or other punctuation. An f-string works too.</li>
+</ul>
+<pre class="code seems"><code>text <span class="sx-verb">seems</span> <span class="sx-phrase">"rude and dismissive"</span>
+text <span class="sx-verb">mentions</span> <span class="sx-phrase">f"the product {name}"</span>
+flags = [t.text <span class="sx-verb">asks</span> <span class="sx-phrase">for a refund</span> <span class="kw">for</span> t <span class="kw">in</span> tickets]</code></pre>
+<p>The question Jev gets is mechanical. <code>X asks for a refund</code> becomes <i>"Does this ask for a refund?"</i>
+  with the value of <code>X</code> as the state. No model reads your source code.</p>
+
+<h3>Relating verbs: <code>value VERB value</code></h3>
+<p><code>contradicts</code> <code>supports</code> <code>answers</code> <code>means</code> <code>matches</code></p>
+<pre class="code seems"><code>reply <span class="sx-verb">contradicts</span> policy
+reply <span class="sx-verb">answers</span> ticket.question
+a <span class="sx-verb">means</span> b                                  <span class="com"># equality by meaning. == stays exact</span>
+reply <span class="sx-verb">contradicts</span> <span class="str">"all sales are final"</span>    <span class="com"># English goes in quotes</span></code></pre>
+<p>Jev gets both values as named state and a question such as <i>"Does <code>reply</code> contradict <code>policy</code>?"</i></p>
+
+<h3>A judgment is a value</h3>
+<p>It can live in a variable, a list or a property, and it is only sent to Jev when the program needs its answer.</p>
+<table>
+  <tr><th>Use</th><th>Result</th></tr>
+  <tr><td><code>if j:</code> <code>bool(j)</code> <code>not j</code></td><td>True or False. Raises <code>Unsure</code> when Jev is not sure enough.</td></tr>
+  <tr><td><code>j.p</code></td><td>The probability of yes, from 0 to 1. Never raises.</td></tr>
+  <tr><td><code>j.verdict()</code></td><td><code>"yes"</code>, <code>"no"</code> or <code>"unsure"</code>. Never raises.</td></tr>
+  <tr><td><code>j.yes</code> <code>j.no</code> <code>j.unsure</code> <code>j.sure</code></td><td>Plain booleans. Never raise.</td></tr>
+  <tr><td><code>a &amp; b</code> <code>a | b</code> <code>~a</code></td><td>Combine judgments without forcing an answer.</td></tr>
+</table>
+
+<h2 id="unsure">3. Unsure</h2>
+<div class="three">
+  <div class="card no"><b>no</b>probability at or below 0.25</div>
+  <div class="card unsure"><b>unsure</b>anything in between</div>
+  <div class="card yes"><b>yes</b>probability at or above 0.75</div>
+</div>
+<p>The default certainty level is 0.75. It is a policy choice, and you can change it.</p>
+<pre class="code seems"><code><span class="kw">if</span> text <span class="sx-verb">asks</span> <span class="sx-phrase">for a refund</span>:
+    <span class="fn">pay_out</span>()
+<span class="kw">else</span>:
+    <span class="fn">close</span>()
+<span class="sx-keyword">unsure</span>:
+    <span class="fn">ask_a_person</span>()</code></pre>
+<ul>
+  <li><code>unsure:</code> is the last branch of an <code>if</code>. It runs when the condition cannot be decided.</li>
+  <li>Without an <code>unsure:</code> branch, an unsure judgment raises <code>Unsure</code>. A program cannot act on a guess by accident.</li>
+  <li><code>and</code>, <code>or</code> and <code>not</code> follow three-valued logic. <i>no and unsure</i> is no. <i>yes or unsure</i> is yes. <i>yes and unsure</i> is unsure.</li>
+</ul>
+<pre class="code seems"><code><span class="kw">try</span>:
+    <span class="kw">if</span> text <span class="sx-verb">asks</span> <span class="sx-phrase">for a refund</span>:
+        <span class="fn">pay_out</span>()
+<span class="kw">except</span> Unsure <span class="kw">as</span> err:
+    log.<span class="fn">info</span>(<span class="str">"not sure: p = %.2f"</span>, err.judgment.p)
+
+<span class="kw">with</span> seems.<span class="fn">certainty</span>(<span class="num">0.95</span>):          <span class="com"># a higher bar inside the block</span>
+    <span class="kw">if</span> text <span class="sx-verb">seems</span> <span class="sx-phrase">like a cancellation</span>:
+        <span class="fn">close_account</span>()</code></pre>
+
+<h2 id="declarations">4. kind, scale, judgment</h2>
+<p>The three Jev primitives are three declarations. Each one is a block with a question and its entries.</p>
+<pre class="code seems"><code><span class="sx-keyword">kind</span> <span class="sx-name">team</span>: <span class="str">"Which team should handle this support ticket?"</span>
+    <span class="sx-entry">billing</span>:   <span class="str">"payments, charges, invoices, refunds"</span>
+    <span class="sx-entry">technical</span>: <span class="str">"bugs, errors, outages, integrations"</span>
+    <span class="sx-entry">other</span>:     <span class="str">"none of the other teams fit"</span>
+
+<span class="sx-keyword">scale</span> <span class="sx-name">anger</span>: <span class="str">"How angry is the customer?"</span>
+    <span class="sx-entry">calm</span>:    <span class="str">"polite or neutral, no complaint"</span>
+    <span class="sx-entry">annoyed</span>: <span class="str">"complains, but stays civil"</span>
+    <span class="sx-entry">furious</span>: <span class="str">"insults, threats, or shouting in capitals"</span>
+
+<span class="sx-keyword">judgment</span> <span class="sx-name">urgent</span>: <span class="str">"Does this ticket need an answer within one hour?"</span>
+    <span class="sx-entry">yes</span>: <span class="str">"an outage, lost money, or a legal deadline"</span>
+    <span class="sx-entry">no</span>:  <span class="str">"a general question or feedback"</span></code></pre>
+<table>
+  <tr><th>Block</th><th>Jev primitive</th><th>Call it</th><th>You get</th></tr>
+  <tr><td><code>kind</code></td><td>Choice</td><td><code>team(text)</code></td><td>a pick: <code>.name</code>, <code>.top</code>, <code>.p("billing")</code>, <code>.probabilities</code>, <code>.confidence</code>, <code>.sure</code>, <code>.is_one_of(a, b)</code></td></tr>
+  <tr><td><code>scale</code></td><td>Score</td><td><code>anger(text)</code></td><td>a rating: <code>.level</code>, <code>.score</code>, <code>.normalized</code>, <code>.probabilities</code>, <code>.confidence</code>, <code>float(r)</code></td></tr>
+  <tr><td><code>judgment</code></td><td>Noul with criteria</td><td><code>urgent(text)</code> or <code>text seems urgent</code></td><td>a judgment</td></tr>
+</table>
+<pre class="code seems"><code>owner = <span class="fn">team</span>(ticket.text)
+mood = <span class="fn">anger</span>(ticket.text)
+
+<span class="kw">if</span> owner == team.billing <span class="kw">and</span> mood &gt;= anger.annoyed:
+    <span class="fn">escalate</span>(ticket)
+<span class="kw">elif</span> ticket.text <span class="sx-verb">seems</span> <span class="sx-phrase">urgent</span>:            <span class="com"># one word after the verb can name a judgment</span>
+    <span class="fn">page_on_call</span>(ticket)
+<span class="sx-keyword">unsure</span>:
+    <span class="fn">review</span>(ticket)
+
+match <span class="fn">team</span>(ticket.text):
+    case team.billing:
+        billing_queue.<span class="fn">put</span>(ticket)
+    case team.technical:
+        bug_tracker.<span class="fn">open</span>(ticket)</code></pre>
+<ul>
+  <li>A description is optional. A name with spaces goes in quotes. A kind takes 2 to 255 entries, a scale 2 to 10 levels, lowest first.</li>
+  <li>Add a "none of these" entry when nothing may fit. Jev can only pick what you list.</li>
+  <li>Write scale levels as situations ("insults or threats"), not degrees ("very angry").</li>
+  <li>Comparisons are three-valued, like judgments. <code>owner == team.billing</code> uses the probability of <code>billing</code>.
+    <code>mood &gt;= anger.annoyed</code> uses the probability that the level is <code>annoyed</code> or higher.</li>
+  <li>To give Jev several named parts, use keywords: <code>team(text=ticket.text, policy=policy)</code>. The question can then
+    point at a part with backticks.</li>
+  <li><code>seems.ask("Is this a greeting?", text)</code> is a one-off yes/no judgment with your own question.</li>
+</ul>
+
+<h2 id="speed">5. Speed</h2>
+<p>One round trip to Jev takes most of a second. The language keeps round trips few, without extra code.</p>
+<ul>
+  <li><b>Lazy.</b> Creating a judgment sends nothing. The first time the program needs any answer, everything
+    waiting is sent. Questions about the same value share one request. Other requests run side by side.</li>
+  <li><b>Conditions.</b> All judgments in one <code>and</code> / <code>or</code> condition go together.</li>
+  <li><b>if / elif.</b> The judgments of the later branches travel with the first one. Answers for branches
+    that are not reached are ignored.</li>
+  <li><b>Exact first.</b> In <code>amount &gt; 500 and text asks for a refund</code>, a false <code>amount &gt; 500</code>
+    means Jev is never called.</li>
+  <li><b>No surprises.</b> A part of a condition that calls a function never runs early. It waits for the
+    judgments before it, as in Python.</li>
+</ul>
+<pre class="code seems"><code>owner, mood, refund = <span class="fn">team</span>(text), <span class="fn">anger</span>(text), text <span class="sx-verb">asks</span> <span class="sx-phrase">for a refund</span>   <span class="com"># nothing sent yet</span>
+<span class="kw">if</span> refund:                                                              <span class="com"># one request, three questions</span>
+    ...</code></pre>
+<p>A plain <code>for</code> loop asks round after round. For independent items use either form:</p>
+<pre class="code seems"><code>results = seems.<span class="fn">each</span>(tickets, route)             <span class="com"># rounds run side by side, results in order</span>
+flags = [t.text <span class="sx-verb">seems</span> <span class="sx-phrase">angry</span> <span class="kw">for</span> t <span class="kw">in</span> tickets]    <span class="com"># or: build the judgments first, read them later</span></code></pre>
+<p>Answers are cached by model, state and question. Set <code>SEEMS_CACHE=/path/file.sqlite</code> to keep them
+between runs. <code>--no-cache</code> or <code>seems.configure(cache=False)</code> asks again.</p>
+
+<h2 id="tools">6. Tools</h2>
+<pre class="code sh"><code>python -m seems run program.seems [args]      # --stats, --trace FILE, --no-cache, --sure 0.9
+python -m seems translate program.seems       # print the Python. --standalone adds the import line
+python -m seems check program.seems           # syntax only</code></pre>
+<pre class="code seems"><code><span class="kw">import</span> seems
+seems.<span class="fn">install</span>()                   <span class="com"># after this, `import desk` finds desk.seems next to .py files</span>
+<span class="kw">with</span> seems.<span class="fn">trace</span>() <span class="kw">as</span> events:     <span class="com"># every request and judgment, as dictionaries</span>
+    <span class="fn">route</span>(ticket)
+<span class="fn">print</span>(seems.<span class="fn">stats</span>())              <span class="com"># totals: judgments, requests, tokens, cost</span></code></pre>
+<ul>
+  <li>A <code>.seems</code> module gets two names for free: <code>Unsure</code> and the hidden runtime <code>__seems__</code>.</li>
+  <li>The translator uses Python's own tokenizer and fixed rules. Valid Python comes out byte for byte the same.
+    In valid Python two plain words never stand next to each other, so <code>text seems angry</code> cannot clash with real code.</li>
+  <li>Each source line becomes exactly one Python line. Tracebacks and debuggers point at the line you wrote.</li>
+  <li>For tests, <code>seems.testing.FakeJev</code> stands in for the API.</li>
+  <li>Settings come from the environment: <code>TYPESAFE_API_KEY</code>, <code>TYPESAFE_MODEL</code> (default <code>jev-latest</code>),
+    <code>SEEMS_CACHE</code>, <code>SEEMS_TRACE</code>.</li>
+</ul>
+
+<h2 id="code">7. Keep in code</h2>
+<p>The TypeSafe docs list what Jev is weak at. Seems does not hide that.</p>
+<ul>
+  <li>Math, counting, number and date comparisons: use Python.</li>
+  <li>Text generation: Jev does not write. Use it to choose, not to produce.</li>
+  <li>Jev reads literally. <code>text seems angry</code> is a loose question. When it matters, declare a
+    <code>judgment</code> and put the edge cases in its <code>yes:</code> and <code>no:</code> criteria.</li>
+  <li>Send only what the question needs. A judgment's state is just the value on its left.</li>
+  <li>Answers move a little between identical requests, by up to 0.05 in our runs. A judgment that sits on the
+    0.75 line can flip between yes and unsure. The cache makes a stored answer final, and the unsure band means a
+    flip lands in "ask a person", not in the opposite action.</li>
+</ul>
+
+<h2 id="run">8. Run it</h2>
+<p>Everything runs in a container. Nothing is installed on your machine. You need Docker (or Podman) and a
+  <a href="https://typesafe.ai">TypeSafe</a> API key in <code>.env</code>.</p>
+<pre class="code sh"><code>git clone https://github.com/kavehmz/seems-lang.git
+cd seems-lang
+cp .env.example .env            # put your TYPESAFE_API_KEY in it
+docker compose up --build -d    # then open http://localhost:3004
+docker compose run --rm app pytest</code></pre>
+<p>The playground shows every judgment with its probability, the exact question Jev got, and what it cost.
+  The support desk page is a small Flask and SQLite service written in Seems.</p>
+<img class="shot" src="playground.jpg" alt="The Seems playground: a support triage program on the left, every Jev judgment with its probability on the right">
+</main>
+</div>
+
+<footer>
+  Seems is an experiment with TypeSafe Jev, a System One model that returns typed judgments and probabilities instead of text.
+  Every code sample on this page is checked by the real Seems parser when the page is built.
+  Source: <a href="https://github.com/kavehmz/seems-lang">github.com/kavehmz/seems-lang</a>.
+</footer>
+</body>
+</html>

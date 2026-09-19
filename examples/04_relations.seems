@@ -1,0 +1,33 @@
+# Relating verbs compare two values: contradicts, supports, answers, means, matches.
+# Here they check draft replies before they go out to customers.
+
+policy = "Customers can return any product for a full refund within 30 days of delivery."
+
+drafts = [
+    ("Can I return the headphones I bought last week?",
+     "Yes. You have 30 days from delivery to return them for a full refund."),
+    ("Can I return the headphones I bought last week?",
+     "Sorry, we never give refunds under any circumstances."),
+    ("How long does shipping to Germany take?",
+     "Thank you for contacting us! We value your feedback."),
+    ("Can I return the headphones I bought last week?",
+     "I think so, but I am not completely sure about headphones."),
+]
+
+for question, reply in drafts:
+    # Both judgments of this if/elif go to Jev in one round trip.
+    if reply contradicts policy:
+        verdict = "BLOCK  contradicts the policy"
+    elif not reply answers question:
+        verdict = "REWORK does not answer the question"
+    else:
+        verdict = "SEND"
+    unsure:
+        verdict = "REVIEW a person should look"
+    print(f"{verdict:<38} <- {reply}")
+
+# `means` is equality by meaning. `==` stays exact.
+a, b = "The parcel has not arrived yet.", "I'm still waiting for my delivery."
+print()
+print("a == b     :", a == b)
+print("a means b  :", bool(a means b))

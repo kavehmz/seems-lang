@@ -1,0 +1,21 @@
+# stars >= 4 is exact: Python answers it.
+# text seems happy is a judgment: Jev answers it with a probability.
+# A judgment is yes, no or unsure. `unsure:` is the branch for "Jev is not sure".
+
+reviews = [
+    ("Arrived in two days and works perfectly. Five stars!", 5),
+    ("Broke after a week and support never answered. Avoid.", 1),
+    ("It is okay I guess. Does the job.", 3),
+    ("Great product, shame about the delivery.", 4),
+]
+
+for text, stars in reviews:
+    if stars >= 4 and text seems happy:
+        label = "happy"
+    elif text seems angry or text asks for a refund:
+        label = "needs care"
+    else:
+        label = "neutral"
+    unsure:
+        label = "NOT SURE"
+    print(f"{label:<11} {stars}*  {text}")
